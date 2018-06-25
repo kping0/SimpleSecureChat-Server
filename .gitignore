@@ -1,3 +1,16 @@
 *.pem
 *.Po
 *.log
+aclocal.m4
+config.h
+config.status
+config.h.in
+makefile.in
+makefile
+stamp-h1
+README
+src/.d*
+ChangeLog
+NEWS
+build-aux/
+configure
