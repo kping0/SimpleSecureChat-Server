@@ -1,6 +1,6 @@
 bin_PROGRAMS = sscserver sscsmodconf
 
-_security_flags = -D_GNU_SOURCE -D_FORTIFY_SOURCE=2 -g -O2 -pipe -fexceptions -fstack-protector-all -fstack-check -Wall -Wextra -Wformat -Wformat-security -Wno-unused-function -Wno-pointer-sign -Wno-unused-result 
+_security_flags = -std=gnu99 -D_GNU_SOURCE -D_FORTIFY_SOURCE=2 -g -O2 -pipe -fexceptions -fstack-protector-all -fstack-check -Wall -Wextra -Wformat -Wformat-security -Wno-unused-function -Wno-pointer-sign -Wno-unused-result 
 
 _security_linker = -pie -fPIE -Wl,-z,relro,-z,now,-z,defs 
 
