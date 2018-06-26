@@ -1,4 +1,5 @@
 *.pem
+*.o
 *.Po
 *.log
 aclocal.m4
