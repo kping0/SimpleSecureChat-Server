@@ -24,7 +24,7 @@
  * Settings for SSCServer (compile settings, cannot be changed at runtime)
  */
 
-//#define DEBUG /* print debug information (ALOT!) */
+#define DEBUG /* print debug information (ALOT!) */
 
 //#define SSCS_CLIENT_FORK /* uncomment if you want to have SSCS fork() for every client */
 

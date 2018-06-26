@@ -15,3 +15,7 @@ ChangeLog
 NEWS
 build-aux/
 configure
+temp 
+sscserver
+sscsmodconf
+autom4te.cache/
