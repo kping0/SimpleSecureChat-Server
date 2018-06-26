@@ -20,9 +20,14 @@
 /* modconf - binary to change SSCS settings easily */
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdint.h>
+#include <string.h>
+#include <limits.h>
+
 #include "simpleconfig.h"
 #include "cstdinfo.h"
-#include "loadconfig.h"
 
 void usage(char* argv[]){
 	fprintf(stdout,"USAGE:   %s [TYPE] [LABEL] [DATA]\n",argv[0]);

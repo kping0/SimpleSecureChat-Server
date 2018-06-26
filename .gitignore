@@ -16,6 +16,6 @@ NEWS
 build-aux/
 configure
 temp 
-sscserver
-sscsmodconf
+ssc_server
+ssc_server_config
 autom4te.cache/

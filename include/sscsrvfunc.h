@@ -50,8 +50,6 @@
 #include "hashing.h"
 #include "simpleconfig.h"
 
-#define UNUSED(x)((void)x)
-
 #define MSGSND 1 //Message Send(normal message)
 #define MSGREC 4 //Get new messages 
 #define REGRSA 2 //Register user in association with an rsa public key
