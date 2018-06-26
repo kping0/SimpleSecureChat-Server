@@ -24,36 +24,47 @@
 SCONFIG* loadconfig(void){
 	char* home_dir = secure_getenv("HOME");
 	size_t home_dir_l = strlen(home_dir);
-	char data_dir[home_dir_l + 17];
+	size_t data_dir_l = home_dir_l + 17;
+	char data_dir[data_dir_l];
 	sprintf(data_dir,"%s/.sscs_conf/",home_dir);
-	char config_file[home_dir_l + 17 + 10];
+	char config_file[data_dir_l + 10];
 	sprintf(config_file,"%ssscs_config",data_dir);
-SCONFIG* config = NULL;	
+	
+	SCONFIG* config = NULL;	
 	if(sconfig_config_exists(config_file) == 0){
 		if(mkdir(data_dir, S_IRUSR | S_IWUSR | S_IXUSR) && errno != EEXIST)cexit("Could not create ~/.ssc_local/ (errno == %d)\n",errno);
 		config = sconfig_load(config_file);
+
+		/* log file config */
+		char log_file[home_dir_l + 17 + 14];
+		sprintf(log_file,"%ssscs_server.log",data_dir);
+		sconfig_set_str(config,"SSCS_LOGFILE",log_file);
+		
+		char cert_file[data_dir_l + 9];
+		sprintf(cert_file,"%scert.pem",data_dir);
+		char key_file[data_dir_l + 8];
+		sprintf(key_file,"%skey.pem",data_dir);
+
+		/* The SSL Certificate & Key should always be located at '~/.sscs_conf/' - 'cert/key.pem' */
+		sconfig_set_str(config,"SSCS_CERTFILE",cert_file);
+		sconfig_set_str(config,"SSCS_KEYFILE",key_file);
+
 	#ifndef RELEASE_IMAGE
+		/* if we are NOT in a release build */
+
+		sconfig_set_str(config,"SSCS_KEYFILE_PW","test");
 		sconfig_set_str(config,"SSCDB_SRV","localhost");
 		sconfig_set_str(config,"SSCDB_USR","SSCServer");
 		sconfig_set_str(config,"SSCDB_PASS","passphrase");
+		sconfig_set_int(config,"SSCS_LOGTOFILE",0);		
 
-		char cert_file[home_dir_l + 17 + 9];
-		sprintf(cert_file,"%scert.pem",data_dir);
-		char key_file[home_dir_l + 17 + 8];
-		sprintf(key_file,"%skey.pem",data_dir);
-
-		sconfig_set_str(config,"SSCS_CERTFILE","cert.pem");
-		sconfig_set_str(config,"SSCS_KEYFILE","key.pem");
-		sconfig_set_str(config,"SSCS_KEYFILE_PW","test");
 	#else
+		/*  we ARE in a release build */
+
 		/* TODO get usr input */
+		sconfig_set_int(config,"SSCS_LOGTOFILE",1);
 	#endif
 
-		char log_file[home_dir_l + 17 + 14];
-		sprintf(log_file,"%ssscs_server.log",data_dir);
-
-		sconfig_set_str(config,"SSCS_LOGFILE",log_file);
-		sconfig_set_int(config,"SSCS_LOGTOFILE",0);		
 		sconfig_write(config);
 	}
 	else{

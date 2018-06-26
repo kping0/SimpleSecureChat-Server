@@ -17,23 +17,33 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SSC_SETTINGSHFSRV
-#define SSC_SETTINGSHFSRV
+#ifndef SSC_SERVER_SETTINGS_H
+#define SSC_SERVER_SETTINGS_H
 
 /*
  * Settings for SSCServer (compile settings, cannot be changed at runtime)
  */
 
-#define DEBUG /* print debug information (ALOT!) */
-
-//#define SSCS_CLIENT_FORK /* uncomment if you want to have SSCS fork() for every client */
-
-#define SSCS_CUSTOM_MALLOC /* comment out to use the system specific malloc & free */
+/* ------ DO NOT EDIT ABOVE THIS LINE ------ */
+/* ------ DO NOT EDIT ABOVE THIS LINE ------ */
+/* ------ DO NOT EDIT ABOVE THIS LINE ------ */
 
 
-/* DO NOT EDIT BEYOND THIS LINE */
-/* DO NOT EDIT BEYOND THIS LINE */
-/* DO NOT EDIT BEYOND THIS LINE */
+
+/* uncomment to print ALOT of debug info (+1000%) */
+/* #define DEBUG// */
+
+/* uncomment if you want to have the server fork() for every client */
+/* #define SSCS_CLIENT_FORK// */
+
+/* comment out to use the system specific malloc & free */
+#define SSCS_CUSTOM_MALLOC
+
+
+
+/* ------ DO NOT EDIT BEYOND THIS LINE ------ */
+/* ------ DO NOT EDIT BEYOND THIS LINE ------ */
+/* ------ DO NOT EDIT BEYOND THIS LINE ------ */
 
 #ifdef SSCS_CUSTOM_MALLOC
 	#include "protected_malloc.h"
@@ -43,4 +53,4 @@
 	#define cmalloc_init() puts("") 
 #endif
 
-#endif /* SSC_SETTINGSHFSRV */
+#endif /* SSC_SERVER_SETTINGS_H */
