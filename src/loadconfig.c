@@ -37,7 +37,7 @@ SCONFIG* loadconfig(void){
 
 		/* log file config */
 		char log_file[home_dir_l + 17 + 14];
-		sprintf(log_file,"%ssscs_server.log",data_dir);
+		sprintf(log_file,"%sssc_server.log",data_dir);
 		sconfig_set_str(config,"SSCS_LOGFILE",log_file);
 		
 		char cert_file[data_dir_l + 9];

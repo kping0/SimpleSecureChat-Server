@@ -187,7 +187,7 @@ void* _ClientHandler(void* data){
 				if( newline ) *newline = 0;
 	
 				if(checkforUser(rusername,db) == 1){
-					cerror(" Cannot add user \"%s\"-> username already taken.\n",rusername);
+					cinfo("Not adding user \"%s\"-> username already taken.\n",rusername);
 					SSL_write(ssl,"ERR",3);
 				}
 				else{

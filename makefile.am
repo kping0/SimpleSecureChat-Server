@@ -1,17 +1,23 @@
-bin_PROGRAMS = ssc_server ssc_server_config
+bin_PROGRAMS = ssc_server ssc_server_config ssc_server_control
 
 _security_flags = -std=gnu99 -D_GNU_SOURCE -D_FORTIFY_SOURCE=2 -g -O2 -pipe -fexceptions -fstack-protector-all -fstack-check -Wall -Wextra -Wformat -Wformat-security -Wno-unused-function -Wno-pointer-sign -Wno-unused-result 
 
 _security_linker = -pie -fPIE -Wl,-z,relro,-z,now,-z,defs 
 
+#server
 ssc_server_SOURCES = src/base64.c include/base64.h src/cstdinfo.c include/cstdinfo.h src/hashing.c include/hashing.h src/loadconfig.c include/loadconfig.h src/protected_malloc.c include/protected_malloc.h src/serialization.c include/serialization.h include/settings.h include/simpleconfig.h src/simpleconfig.c src/sscsrvfunc.c include/sscsrvfunc.h src/secure_chat_server.c
 
 ssc_server_CFLAGS = $(_security_flags) `mysql_config --cflags` -Iinclude
 
 ssc_server_LDFLAGS = $(_security_linker) -lpthread -lcrypto -lssl `mysql_config --libs` 
 
+#server config
 ssc_server_config_SOURCES = src/modconf.c src/base64.c include/base64.h src/cstdinfo.c include/cstdinfo.h src/protected_malloc.c include/protected_malloc.h src/simpleconfig.c include/simpleconfig.h src/serialization.c include/serialization.h 
 
 ssc_server_config_CFLAGS = $(_security_flags) -Iinclude
 
 ssc_server_config_LDFLAGS = $(_security_linker)
+
+# server_ctl
+ssc_server_control_SOURCES = src/server_ctl.c
+

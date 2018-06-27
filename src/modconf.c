@@ -42,9 +42,9 @@ int main(int argc,char* argv[]){
 	char* home_dir = secure_getenv("HOME");
 	size_t home_dir_l = strlen(home_dir);
 	char data_dir[home_dir_l + 17];
-	sprintf(data_dir,"%s/.ssc_conf/",home_dir);
+	sprintf(data_dir,"%s/.sscs_conf/",home_dir);
 	char config_file[home_dir_l + 17 + 10];
-	sprintf(config_file,"%sssconfig",data_dir);
+	sprintf(config_file,"%ssscs_config",data_dir);
 	SCONFIG* config = NULL;	
 	if(sconfig_config_exists(config_file) == 0){
 		if(mkdir(data_dir, S_IRUSR | S_IWUSR | S_IXUSR) && errno != EEXIST){
