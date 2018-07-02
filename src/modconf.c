@@ -111,5 +111,6 @@ int main(int argc,char* argv[]){
 	 * been removed.
 	 */
 	sconfig_write(config);
+	sconfig_close(config);
 	return 0;	
 }

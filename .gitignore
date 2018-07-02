@@ -18,4 +18,5 @@ configure
 temp 
 ssc_server
 ssc_server_config
+ssc_server_control
 autom4te.cache/

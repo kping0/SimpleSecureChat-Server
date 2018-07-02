@@ -20,6 +20,7 @@
 #include "hashing.h"
 
 byte* memncat(byte* first,size_t firstl,byte* second,size_t secondl){ //concatenates two blocks of memory 
+	debuginfo();
 	byte* finalbuffer = cmalloc(firstl+secondl);
 	byte* writepointer = finalbuffer;
 	memcpy(writepointer,first,firstl);
@@ -29,6 +30,7 @@ byte* memncat(byte* first,size_t firstl,byte* second,size_t secondl){ //concaten
 }
 
 SSCS_HASH* SSCS_createhash(byte* data,size_t datal){
+	debuginfo();
 	byte salt[20]; 	
 	byte hash[SHA512_DIGEST_LENGTH];
 
@@ -54,6 +56,7 @@ SSCS_HASH* SSCS_createhash(byte* data,size_t datal){
 }
 
 int SSCS_comparehash(byte* data,size_t datal,SSCS_HASH* originalhash){
+	debuginfo();
 	byte* salt = originalhash->salt;
 	size_t saltl = originalhash->saltl;
 	byte* hash = originalhash->hash;
@@ -77,6 +80,7 @@ int SSCS_comparehash(byte* data,size_t datal,SSCS_HASH* originalhash){
 }
 
 void SSCS_freehash(SSCS_HASH** hash){
+	debuginfo();
 	cfree(((*hash)->hash));
 	cfree(((*hash)->salt));
 	cfree((*hash));

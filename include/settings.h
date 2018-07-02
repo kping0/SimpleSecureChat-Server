@@ -31,14 +31,16 @@
 
 
 /* uncomment to print ALOT of debug info (+1000%) */
-/* #define DEBUG// */
+ #define DEBUG
+
+/* print a line to stdout for every function called (ALSO NEEDS DEBUG ENABLED) */
+ #define SSCS_FUNCTION_LOG
 
 /* uncomment if you want to have the server fork() for every client */
-/* #define SSCS_CLIENT_FORK// */
+// #define SSCS_CLIENT_FORK
 
 /* comment out to use the system specific malloc & free */
 #define SSCS_CUSTOM_MALLOC
-
 
 
 /* ------ DO NOT EDIT BEYOND THIS LINE ------ */
@@ -52,5 +54,12 @@
 	#define cfree(ptr) free(ptr) 
 	#define cmalloc_init() puts("") 
 #endif
+
+#if defined(DEBUG) && defined(SSCS_FUNCTION_LOG)
+	#define debuginfo() cfunction_info()
+#else
+	#define debuginfo() cempty_function()
+#endif /* DEBUG && SSCS_FUNCTION_LOG */
+
 
 #endif /* SSC_SERVER_SETTINGS_H */

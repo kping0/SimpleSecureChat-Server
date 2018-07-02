@@ -122,7 +122,7 @@ unsigned char *gen_rdm_bytestream (size_t num_bytes){  //generate semi-random by
  * Allocate Buffer 
  */
 void* sscs_cmalloc(size_t size,const char* file, int line){
-	cdebug(" Called sscs_cmalloc() (Called from %s-%d)\n",file,line);
+	debuginfo();
 	if(size <= 0)return NULL;
 	size_t origsize = size;
 /*
@@ -188,7 +188,7 @@ void* sscs_cmalloc(size_t size,const char* file, int line){
 }
 
 void sscs_cfree(void* ptr,const char* file,int line){
-	cdebug(" Called sscs_cfree() (Called from %s-%d)\n",file,line);
+	debuginfo();
 	if(ptr == NULL){
 		cdebug(" ptr passed is NULL\n");
 		return;

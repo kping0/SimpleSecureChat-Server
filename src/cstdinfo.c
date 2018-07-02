@@ -29,6 +29,16 @@ void cinfo_internal_unused(void* x, ...){
 	(void)x;
 	return;
 }
+void cempty_function(void){
+	return;
+}
+void cfunction_info_internal(const char* function_name,const char* file,int line){ /* print info about calling function */
+	if(cinfo_check_init == 0)cinitfd(stdout,stderr);
+
+	fprintf(cinfo_out,"[FUNCTION_INFO] %s() executed. (%s -- %i)\n",function_name,file,line);
+
+	return;	
+}
 void cinitfd(FILE* cinfo_out_file,FILE* cinfo_err_file){
 	cinfo_out = cinfo_out_file;
 	cinfo_err = cinfo_err_file;

@@ -20,6 +20,7 @@
 #include "sscsrvfunc.h"
 
 void pexit(char* errormsg){
+	debuginfo();
 	cerror(" %s\n",errormsg);
 #ifdef SSCS_CLIENT_FORK
 	exit(1);
@@ -29,9 +30,10 @@ void pexit(char* errormsg){
 } /* pexit */
 
 void exit_mysql_err(MYSQL* con){ //print exit message and exit
+	debuginfo();
 	cerror(" %s\n",mysql_error(con));
 	mysql_close(con);
-	#ifdef SSCS_CLIENT_FORK
+#ifdef SSCS_CLIENT_FORK
 	exit(1);
 #else
 	pthread_exit(NULL);
@@ -39,12 +41,14 @@ void exit_mysql_err(MYSQL* con){ //print exit message and exit
 } /* exit_mysql_err */
 
 int my_mysql_query(MYSQL* con,char* query){ //mysql_query() with error checking
+	debuginfo();
 	int retval = mysql_query(con,query);
 	if(retval)exit_mysql_err(con);
 	return retval;
 } /* my_mysql_query */
 
 void init_DB(void){ //prepare database
+	debuginfo();
 	cinfo("MySQL client version-> %s",mysql_get_client_info());
 	char* srvhost = sconfig_get_str(config,"SSCDB_SRV");	
 	char* srvuser = sconfig_get_str(config,"SSCDB_USR");
@@ -73,6 +77,7 @@ void init_DB(void){ //prepare database
 } /* init_DB */
 
 MYSQL* get_handle_DB(void){ //return active handle to database
+	debuginfo();
 	MYSQL* con = mysql_init(NULL);
 	if(!con){
 		cerror(" %s\n",mysql_error(con));
@@ -93,6 +98,7 @@ MYSQL* get_handle_DB(void){ //return active handle to database
 } /* get_handle_DB */
 
 int create_socket(int port){ //bind socket s to port and return socket s
+	debuginfo();
     int s = 0;
     struct sockaddr_in addr;
 
@@ -121,15 +127,18 @@ int create_socket(int port){ //bind socket s to port and return socket s
 } /* create_socket */
 
 void init_openssl(){ 
+	debuginfo();
     SSL_load_error_strings();	
     OpenSSL_add_ssl_algorithms();
 } /* init_openssl */
 
 void cleanup_openssl(){
+	debuginfo();
     EVP_cleanup();
 } /* cleanup_openssl */
 
 SSL_CTX *create_context(){
+	debuginfo();
     const SSL_METHOD *method;
     SSL_CTX *ctx;
 
@@ -146,6 +155,7 @@ SSL_CTX *create_context(){
 } /* create_context */
 
 void configure_context(SSL_CTX *ctx){
+	debuginfo();
     char* keypw = sconfig_get_str(config,"SSCS_KEYFILE_PW");
     char* certfile = sconfig_get_str(config,"SSCS_CERTFILE");
     char* keyfile = sconfig_get_str(config,"SSCS_KEYFILE");
@@ -174,6 +184,7 @@ void configure_context(SSL_CTX *ctx){
 } /* configure_context */
 
 int checkforUser(char* username,MYSQL* db){ //Check if user exists in database, returns 1 if true, 0 if false
+	debuginfo();
 //Create Variables for STUPID bind system for MYSQL
 	MYSQL_STMT* stmt = mysql_stmt_init(db);
 	if(!stmt)return 1; //make sure user is not added if an error occurs
@@ -228,6 +239,7 @@ int checkforUser(char* username,MYSQL* db){ //Check if user exists in database, 
 } /* checkforUser */
 
 int addUser2DB(char* username,char* b64rsa,int rsalen,char* authkey,MYSQL* db){ //Add User to database, returns 1 on success,0 on error
+	debuginfo();
 //        printf("Trying to add user: %s,b64rsa is %s, w len of %i, authkey is %s\n",username,b64rsa,rsalen,authkey);
 	
 	MYSQL_STMT* stmt = mysql_stmt_init(db);
@@ -319,6 +331,7 @@ void ssc_sig_handler(int sig){ //Function to handle signals
 } /* ssc_sig_handler */
 
 int getUserUID(char* username,MYSQL *db){ //gets uid for the username it is passed in args (to add a message to db for ex.)
+	debuginfo();
        if(!username){
                 mysql_close(db);
                 #ifdef SSCS_CLIENT_FORK
@@ -417,6 +430,7 @@ int getUserUID(char* username,MYSQL *db){ //gets uid for the username it is pass
 } /* getUserUID */
 
 int AddMSG2DB(MYSQL* db,char* recipient,unsigned char* message){ //Adds a message to the database, returns 1 on success, 0 on error
+	debuginfo();
         MYSQL_STMT* stmt = mysql_stmt_init(db);
         if(!stmt){
                 cerror(" mysql_stmt_init out of mem->addMsg2DB\n");
@@ -478,6 +492,7 @@ int AddMSG2DB(MYSQL* db,char* recipient,unsigned char* message){ //Adds a messag
 
 const char* GetEncodedRSA(char* username, MYSQL* db){ //Functions that returns an encoded user RSA key.
 
+	debuginfo();
         char* newline = strchr(username,'\n');
         if( newline ) *newline = 0;
         MYSQL_STMT* stmt = mysql_stmt_init(db);
@@ -592,6 +607,7 @@ const char* GetEncodedRSA(char* username, MYSQL* db){ //Functions that returns a
 } /* GetEncodedRSA */
 
 char* GetUserMessagesSRV(char* username,MYSQL* db){ //Returns buffer with encoded user messages
+	debuginfo();
         int usruid = getUserUID(username,db);
         MYSQL_STMT* stmt = mysql_stmt_init(db);
         if(!stmt){
@@ -746,6 +762,7 @@ while(1){
 
 
 void childexit_handler(int sig){ //Is registered to the Signal SIGCHLD, kills all zombie processes
+	debuginfo();
 	(void)sig;
 	int saved_errno = errno;
 	while(waitpid((pid_t)(-1),0,WNOHANG) > 0){}
@@ -753,6 +770,7 @@ void childexit_handler(int sig){ //Is registered to the Signal SIGCHLD, kills al
 } /* childexit_handler */
 
 SSCS_HASH* getUserAuthKeyHash(char* username, MYSQL* db){
+	debuginfo();
         char* newline = strchr(username,'\n');
         if( newline ) *newline = 0;
         MYSQL_STMT* stmt = mysql_stmt_init(db);

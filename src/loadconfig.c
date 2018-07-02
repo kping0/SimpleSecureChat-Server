@@ -20,10 +20,11 @@
 
 #include "loadconfig.h"
 
-#define RELEASE_IMAGE
+/* #define RELEASE_IMAGE */
 
 /* loadconfig(): return a ptr to a sconfig object & if config is not found, create & populate with default settings */
 static void getfromstdin(char* buffer,int buffer_l){
+	debuginfo();
 	int i = 0;
 	while(1){
 		if(i+1 == buffer_l){
@@ -39,6 +40,7 @@ static void getfromstdin(char* buffer,int buffer_l){
 	}
 }
 SCONFIG* loadconfig(void){
+	debuginfo();
 	char* home_dir = secure_getenv("HOME");
 	size_t home_dir_l = strlen(home_dir);
 	size_t data_dir_l = home_dir_l + 17;

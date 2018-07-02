@@ -76,6 +76,7 @@ if(sconfig_get_int(config,"SSCS_LOGTOFILE") == 1){
         FILE* stderrl = freopen(logfilepath,"a+",stderr); 
         cinitfd(stdoutl,stderrl);
 }
+    debuginfo();
     //register signal handlers..
     signal(SIGINT,ssc_sig_handler);
     signal(SIGABRT,ssc_sig_handler);
@@ -140,6 +141,7 @@ if(sconfig_get_int(config,"SSCS_LOGTOFILE") == 1){
     return 0;
 }
 void* _ClientHandler(void* data){
+		debuginfo();
 		struct sscs_handler_data* client_info = data;
 		int client = client_info->client_socket;
 		SSL_CTX* ctx = client_info->ctx;
