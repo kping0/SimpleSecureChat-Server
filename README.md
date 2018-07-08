@@ -1,4 +1,4 @@
-![SimpleSecureChat-Server](img/ssc_logo.png)<span style="color: red">(SERVER)</span>
+![SimpleSecureChat-Server](img/ssc_logo.png)<h1>(SERVER)</h1>
  <h4>SimpleSecureChat is a simple, end to end encrypted opensource messaging application that minimizes dependencies & exposure and maximizes security & simplicity. The code is meant to be easy to read and understand. Currently the Client and Server code combined is less than 10,000 lines.</h4>
  <h4>Server side of SimpleSecureChat. Refer to https://github.com/kping0/simplesecurechat for the Client application.  </h4>
   
@@ -6,6 +6,8 @@
   Go to our Wiki page https://github.com/kping0/SimpleSecureChat-Server/wiki
 <h2> Bug reports </h2>
   Please report any security critical bugs to 'kping0@protonmail.com'
+<h2> Credits </h2>
+  Logo by dee-y - 'github.com/dee-y'.
 <h2>License Header</h2>
 
   SimpleSecureChat Server - E2E encrypted messaging application (Server) written in C
