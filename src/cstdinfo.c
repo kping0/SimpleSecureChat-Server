@@ -83,7 +83,7 @@ void cdebug_internal(const char* file, int line,const char* calling_function,cha
 	time_t t;
 	time(&t);
 	struct tm * timeinfo = localtime(&t);
-	fprintf(cinfo_out,"[DEBUG](%d:%d:%d_%d-%d-%d)--(file: %s -- line :%i)->%s() ",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,timeinfo->tm_mday,timeinfo->tm_mon+1,timeinfo->tm_year+1900,file,line,calling_function);
+	fprintf(cinfo_out,"[DEBUG](%d:%d:%d_%d-%d-%d)--(file: %s -- line: %i)->%s() ",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,timeinfo->tm_mday,timeinfo->tm_mon+1,timeinfo->tm_year+1900,file,line,calling_function);
 	va_list args;
 	va_start(args,format);
 	vfprintf(cinfo_out,format,args);

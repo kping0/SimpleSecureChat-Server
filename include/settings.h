@@ -33,8 +33,8 @@
 /* uncomment to print ALOT of debug info (+1000%) */
  #define DEBUG
 
-/* print a line to stdout for every function called (ALSO NEEDS DEBUG ENABLED) */
- #define SSCS_FUNCTION_LOG
+/* print a line to stdout for every function called (only works if DEBUG is defined) !!! NOT RECOMMENDED !!! */
+// #define SSCS_FUNCTION_LOG
 
 /* uncomment if you want to have the server fork() for every client */
 // #define SSCS_CLIENT_FORK

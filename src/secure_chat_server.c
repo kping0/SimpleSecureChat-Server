@@ -64,10 +64,12 @@ int sock = 0;
 
 SCONFIG* config = NULL; /* Global SimpleConfig configuration */
 
+SSL_CTX *ctx = NULL; /* Global SSL Context */
+
 void* _ClientHandler(void* data);
 
 int main(void){
-	
+     debuginfo();
      config = loadconfig();	
 
 if(sconfig_get_int(config,"SSCS_LOGTOFILE") == 1){
@@ -76,20 +78,14 @@ if(sconfig_get_int(config,"SSCS_LOGTOFILE") == 1){
         FILE* stderrl = freopen(logfilepath,"a+",stderr); 
         cinitfd(stdoutl,stderrl);
 }
-    debuginfo();
     //register signal handlers..
     signal(SIGINT,ssc_sig_handler);
     signal(SIGABRT,ssc_sig_handler);
-    signal(SIGFPE,ssc_sig_handler);
-    signal(SIGILL,ssc_sig_handler);
-    signal(SIGSEGV,SIG_DFL);
     signal(SIGTERM,ssc_sig_handler);
     signal(SIGCHLD,childexit_handler);
     //Init MYSQL Database
     init_DB();
 	
-    SSL_CTX *ctx = NULL;
-
     //initalize openssl and create the ssl_ctx context
     init_openssl();
     ctx = create_context();
@@ -123,6 +119,7 @@ if(sconfig_get_int(config,"SSCS_LOGTOFILE") == 1){
 		if(pid == 0){ //If the pid is 0 we are running in the child process(our designated handler) 		
 			_ClientHandler(_hdl_data);
 		}
+		cfree(_hdl_data);
 	#else
 		pthread_t _thr_id;
 		if(pthread_create(&_thr_id,NULL,_ClientHandler,_hdl_data)){
@@ -133,11 +130,11 @@ if(sconfig_get_int(config,"SSCS_LOGTOFILE") == 1){
 
 	#endif
 	} 
-    //If while loop is broken close listening socket and do cleanup (This should only be run on the server)
     cdebug(" Server Main Process is shutting down..\n");
     close(sock);
     SSL_CTX_free(ctx);
     cleanup_openssl();
+    sconfig_close(config);
     return 0;
 }
 void* _ClientHandler(void* data){
@@ -312,12 +309,15 @@ void* _ClientHandler(void* data){
 		BIO_free(bio);
 		SSL_free(ssl);
 		close(client); 
+		mysql_close(db);
 		cfree(buf); 
+		cfree(data);
 
-	if(sconfig_get_int(config,"SSCS_CLIENT_FORK") == 1)
+	#ifdef SSCS_CLIENT_FORK
 		exit(0);
-	else
+	#else
 		pthread_exit(0);
+	#endif
 	/*
 	* End of Client Handler Code
 	*/

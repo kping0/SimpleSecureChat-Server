@@ -1,4 +1,5 @@
-<h1>SimpleSecureChat-Server</h1>
+![SimpleSecureChat-Server](img/ssc_logo.png)<span style="color: red">(SERVER)</span>
+ <h4>SimpleSecureChat is a simple, end to end encrypted opensource messaging application that minimizes dependencies & exposure and maximizes security & simplicity. The code is meant to be easy to read and understand. Currently the Client and Server code combined is less than 10,000 lines.</h4>
  <h4>Server side of SimpleSecureChat. Refer to https://github.com/kping0/simplesecurechat for the Client application.  </h4>
   
 <h2>Building and Configuration of Server</h2>

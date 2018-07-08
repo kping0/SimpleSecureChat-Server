@@ -140,28 +140,28 @@ void cleanup_openssl(){
 SSL_CTX *create_context(){
 	debuginfo();
     const SSL_METHOD *method;
-    SSL_CTX *ctx;
+    SSL_CTX *ctx_temp;
 
     method = SSLv23_server_method();
 
-    ctx = SSL_CTX_new(method);
-    if (!ctx) {
+    ctx_temp = SSL_CTX_new(method);
+    if (!ctx_temp) {
 	cerror(" Unable to create SSL context\n");
 	ERR_print_errors_fp(stderr);
 	exit(EXIT_FAILURE);
     }
 
-    return ctx;
+    return ctx_temp;
 } /* create_context */
 
-void configure_context(SSL_CTX *ctx){
+void configure_context(SSL_CTX *ctx_temp){
 	debuginfo();
     char* keypw = sconfig_get_str(config,"SSCS_KEYFILE_PW");
     char* certfile = sconfig_get_str(config,"SSCS_CERTFILE");
     char* keyfile = sconfig_get_str(config,"SSCS_KEYFILE");
-    SSL_CTX_set_default_passwd_cb_userdata(ctx,keypw);
+    SSL_CTX_set_default_passwd_cb_userdata(ctx_temp,keypw);
     /* Set the key and cert */
-    if (SSL_CTX_use_certificate_file(ctx,certfile , SSL_FILETYPE_PEM) <= 0) {
+    if (SSL_CTX_use_certificate_file(ctx_temp,certfile , SSL_FILETYPE_PEM) <= 0) {
         ERR_print_errors_fp(stderr);
         cfree(keypw);
         cfree(certfile);
@@ -169,7 +169,7 @@ void configure_context(SSL_CTX *ctx){
 	exit(EXIT_FAILURE);
     }
 
-    if (SSL_CTX_use_PrivateKey_file(ctx,keyfile, SSL_FILETYPE_PEM) <= 0 ) {
+    if (SSL_CTX_use_PrivateKey_file(ctx_temp,keyfile, SSL_FILETYPE_PEM) <= 0 ) {
         ERR_print_errors_fp(stderr);
         cfree(keypw);
         cfree(certfile);
@@ -314,20 +314,15 @@ int addUser2DB(char* username,char* b64rsa,int rsalen,char* authkey,MYSQL* db){ 
 } /* addUser2DB */
 
 void ssc_sig_handler(int sig){ //Function to handle signals
-		if(sig == SIGINT || sig == SIGABRT || sig == SIGTERM){
-			cdebug("\nCaught Signal... Exiting\n");
-			close(sock);
-			exit(EXIT_SUCCESS);
-		}
-		else if(sig == SIGFPE){
-			exit(EXIT_FAILURE);	
-		}
-		else if(sig == SIGILL){
-			exit(EXIT_FAILURE);
-		}
-		else{
-			exit(EXIT_FAILURE);	
-		}
+	(void)sig;
+	cdebug("\nCaught Signal... Exiting\n");
+	sconfig_close(config);
+	SSL_CTX_free(ctx);
+	cleanup_openssl();
+	EVP_cleanup();
+	mysql_library_end();
+	close(sock);
+	exit(EXIT_SUCCESS);
 } /* ssc_sig_handler */
 
 int getUserUID(char* username,MYSQL *db){ //gets uid for the username it is passed in args (to add a message to db for ex.)

@@ -62,6 +62,7 @@
 
 extern int sock;
 extern SCONFIG* config;
+extern SSL_CTX* ctx;
 
 int create_socket(int port);
 
