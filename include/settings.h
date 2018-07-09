@@ -21,31 +21,50 @@
 #define SSC_SERVER_SETTINGS_H
 
 /*
- * Settings for SSCServer (compile settings, cannot be changed at runtime)
+ * -- DESCRIPTION --
+ * Settings for SSCServer (compile settings, cannot be changed on the fly by modifying the configfile)
+ * uncomment / comment out to suit your needs
+ * -- DESCRIPTION -- 
  */
 
+
+
+
+
 /* ------ DO NOT EDIT ABOVE THIS LINE ------ */
 /* ------ DO NOT EDIT ABOVE THIS LINE ------ */
 /* ------ DO NOT EDIT ABOVE THIS LINE ------ */
 
 
 
-/* uncomment to print ALOT of debug info (+1000%) */
- #define DEBUG
+/* should only be defined in release ready code (&must be defined if compiling for a live enviroment) (cannot be defined with DEBUG) */
+// #define RELEASE_IMAGE 
 
-/* print a line to stdout for every function called (only works if DEBUG is defined) !!! NOT RECOMMENDED !!! */
+/* Print alot of debug information (cannot be defined on a release) */
+// #define DEBUG
+
+/* Print every function call to STDOUT. Needs DEBUG. ***ALOT*** of output */
 // #define SSCS_FUNCTION_LOG
 
-/* uncomment if you want to have the server fork() for every client */
+/* Print live information (messages, salts, &etc) Needs DEBUG. ***ALOT of output */
+// #define SSCS_OUTPUT_LIVE
+
+/* fork for every client (default is spawn a thread) */
 // #define SSCS_CLIENT_FORK
 
-/* comment out to use the system specific malloc & free */
+/* use protected heap allocation functions */
 #define SSCS_CUSTOM_MALLOC
 
 
+
+
 /* ------ DO NOT EDIT BEYOND THIS LINE ------ */
 /* ------ DO NOT EDIT BEYOND THIS LINE ------ */
 /* ------ DO NOT EDIT BEYOND THIS LINE ------ */
+
+
+
+
 
 #ifdef SSCS_CUSTOM_MALLOC
 	#include "protected_malloc.h"
@@ -61,5 +80,12 @@
 	#define debuginfo() cempty_function()
 #endif /* DEBUG && SSCS_FUNCTION_LOG */
 
+#if defined(DEBUG) && defined(RELEASE_IMAGE) 
+	#error You cannot have debug enabled in a release build. 
+#endif /* DEBUG && RELEASE_IMAGE */
+
+#if !defined(DEBUG) && defined(SSCS_OUTPUT_LIVE)
+	#error You need debug enabled for live output
+#endif
 
 #endif /* SSC_SERVER_SETTINGS_H */

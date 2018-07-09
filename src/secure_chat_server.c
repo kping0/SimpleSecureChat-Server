@@ -186,11 +186,11 @@ void* _ClientHandler(void* data){
 				if( newline ) *newline = 0;
 	
 				if(checkforUser(rusername,db) == 1){
-					cinfo("Not adding user \"%s\"-> username already taken.\n",rusername);
+					cdebug("Not adding user \"%s\"-> username already taken.\n",rusername);
 					SSL_write(ssl,"ERR",3);
 				}
 				else{
-					cdebug(" User \"%s\" is trying to register\n",rusername);
+					cdebug(" User \"%s\" is trying to register",rusername);
 					char* b64rsa = (char*)SSCS_object_string(obj0,"b64rsa");
 					int rsalen = SSCS_object_int(obj0,"rsalen");
 					char* authkey = (char*)SSCS_object_string(obj0,"authkey");
@@ -245,10 +245,10 @@ void* _ClientHandler(void* data){
 						* Important Functions are only accessible when user has authenticated.
 						*/
 						if(msgp == GETRSA){ //Client is requesting a User Public Key
-							cdebug(" Client Requested Public Key,handling...\n");
+							cdebug("Client Requested Public Key,handling...\n");
 							char* rsausername = (char*)SSCS_object_string(obj,"username");
 							const char* uRSAenc = GetEncodedRSA(rsausername,db);
-							cdebug(" Sending buffer \"%s\"\n",uRSAenc);
+							cdebug("Sending buffer \"%s\"\n",uRSAenc);
 							if(uRSAenc){
 								SSL_write(ssl,uRSAenc,strlen(uRSAenc));	
 								cfree((void*)uRSAenc);
@@ -256,11 +256,11 @@ void* _ClientHandler(void* data){
 							cfree(rsausername);
 						}
 						else if(msgp == MSGREC){ //Client is requesting stored messages
-							cdebug(" Client Requesting New Messages, handling...\n");
 							char* retmsg = GetUserMessagesSRV(authusername,db);
-							cdebug(" msg is %s\n",retmsg);
-							cdebug(" Length of messages returned is %d\n",(int)strlen(retmsg));
 							if(strlen(retmsg) != 0){ 
+							#ifdef SSCS_OUTPUT_LIVE
+								cdebug("User(%s) wants new messages, Sending Message with len %d -- %s",authusername,strlen(retmsg),retmsg);
+							#endif
 								SSL_write(ssl,retmsg,strlen(retmsg));
 							}
 							else{
@@ -272,18 +272,25 @@ void* _ClientHandler(void* data){
 							char* recipient = NULL;
 							recipient = (char*)SSCS_object_string(obj,"recipient");
 							if(!recipient){
-							cerror(" Recipient for message not specified,exiting\n");
-							goto end;
+								cerror(" Recipient for message not specified,exiting\n");
+								goto end;
 							}
-							if(SSCS_object_string(obj,"sender") != NULL)goto end;
-							SSCS_object_add_data(obj,"sender",(byte*)authusername,strlen(authusername));
 							char* newline = strchr(recipient,'\n');
 							if( newline ) *newline = 0;
+							if(SSCS_object_string(obj,"sender") != NULL)goto end;
+							SSCS_object_add_data(obj,"sender",(byte*)authusername,strlen(authusername));
 							char* b64modbuf = obj->buf_ptr;
-							cdebug(" buffering message from %s to %s\n",authusername,recipient);
+							cdebug("Buffering message from %s to %s\n",authusername,recipient);
+							#ifdef SSCS_OUTPUT_LIVE
+							cdebug("Message length %d -- content -- %s",strlen(obj->buf_ptr),obj->buf_ptr);
+							#endif
 							if(AddMSG2DB(db,recipient,(unsigned char*)b64modbuf) == -1){
 								cerror(" Error occurred adding MSG to Database\n");
+								SSL_write(ssl,"ERR",3);	
 							}				
+							else{
+								SSL_write(ssl,"ACK",3);
+							}
 						}
 						SSCS_release(&obj);
 						fflush(stdout);
