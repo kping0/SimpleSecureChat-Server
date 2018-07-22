@@ -29,11 +29,6 @@ void sscs_chkaddr(void* ptr,const char* file,int line){
 	if(chv != SSCS_HEAP_MAGIC){
 		cerror(" sscs_chkaddr() header checksum error - Called from %s - line %d\n",file,line);
 		ccrit(" Heap Overflow at address %p likely,exiting \n",orig);
-	#ifdef SSCS_CLIENT_FORK
-	exit(1);
-#else
-	pthread_exit(NULL);
-#endif
 	}
 	byte* rngbytes = readpointer; readpointer += 8;
 	size_t bufsize = *(size_t*)readpointer; readpointer += 8;
@@ -72,6 +67,7 @@ size_t sscs_heap_object_size(void* ptr,const char* file,int line){
 
 void sscs_ignore_result(long long int unused){ //used to suppress write() error
 	(void)unused;
+	return;
 }
 /*
  * Signal handler to receive SIGSEGV (if guard page is accessed)
@@ -98,14 +94,14 @@ void sscs_cmalloc_sig_handler(int signum,siginfo_t *info,void* context){
 	exit(EXIT_FAILURE);
 }
 
-void sscs_cmalloc_init(void){
-	srand((unsigned int)time(NULL));
-	signal(SIGSEGV,SIG_DFL);
+void sscs_cmalloc_init(void){ /* perform init steps for allocater */
+	srand((unsigned int)time(NULL)); /* seed rng */
+	signal(SIGSEGV,SIG_DFL); /* reset signal handler for segfault */
 	struct sigaction sa;
 	sa.sa_flags = SA_SIGINFO;
 	sa.sa_sigaction = sscs_cmalloc_sig_handler;
 	sigemptyset(&sa.sa_mask);
-	sigaction(SIGSEGV,&sa,NULL);
+	sigaction(SIGSEGV,&sa,NULL); /* register our signal handler */
 	return;
 }
 
@@ -123,24 +119,20 @@ unsigned char *gen_rdm_bytestream (size_t num_bytes){  //generate semi-random by
  */
 void* sscs_cmalloc(size_t size,const char* file, int line){
 	debuginfo();
-	if(size <= 0)return NULL;
+	if(size <= 0)return NULL; /* cannot allocate a buffer smaller than or eq to 0 */
 	size_t origsize = size;
 /*
  * Calculate size to allocate (must be a multiple of PAGESIZE)
  */ 
 	size += 40; //add 40Bytes for Padding
-	size_t alloc_len = size + PAGESIZE - (size % PAGESIZE) + PAGESIZE; //get next multiple of pagesize that fits size&metadata + guardpage length
-	char* buf = aligned_alloc(PAGESIZE,alloc_len);
+	size_t alloc_len = size + PAGESIZE - (size % PAGESIZE) + PAGESIZE; /* get next multiple of pagesize that fits size&metadata + guardpage length */
+	char* buf = aligned_alloc(PAGESIZE,alloc_len); 
 	if(!buf){
 		cexit("cmalloc() could not allocate aligned memory (called from %s line %d)\n",file,line);
 		return NULL;
 	}
-	memset(buf,0,alloc_len);
-/*
- * Add a Guard Page to the end of the allocated buffer
- * Note that this has a HUGE memory overhead especially for small buffers -> cmalloc(10) -> ~8192B allocated 
- */
-	if(mprotect(buf+(alloc_len-PAGESIZE),PAGESIZE,PROT_NONE) != 0){ //create a 4KB guard page 
+	memset(buf,0,alloc_len); /* clear allocated buffer */
+	if(mprotect(buf+(alloc_len-PAGESIZE),PAGESIZE,PROT_NONE) != 0){ /* add a guardpage to the end of our buffer */
 		fprintf(stderr,"[ERROR] Could not add guard page (called from %s line %d): ",file,line);
 		switch(errno){
 			case EACCES:
@@ -176,12 +168,12 @@ void* sscs_cmalloc(size_t size,const char* file, int line){
 	void* writepointer = buf;
 	*(int*)writepointer = SSCS_HEAP_MAGIC; writepointer += 4; //add SSCS_HEAP_MAGIC  
 	size_t* checkvar = (size_t*)gen_rdm_bytestream(8); //add secret magic
-	*(size_t*)writepointer = *checkvar; writepointer += 8;
+	*(size_t*)writepointer = *checkvar; writepointer += 8; // add check variable
 	*(size_t*)writepointer = origsize; writepointer += 8; //add size 
 	*(char*)writepointer = 0x0; writepointer++; //padding
-	void* retptr = writepointer; writepointer+=origsize; //actual buffer
+	void* retptr = writepointer; writepointer+=origsize; //actual buffer - we dont touch it
 	*(char*)writepointer = 0x0; writepointer++; //padding	
-	*(size_t*)writepointer = *checkvar; writepointer += 8; 
+	*(size_t*)writepointer = *checkvar; writepointer += 8; //add check variable 
 	*(int*)writepointer = SSCS_HEAP_MAGIC; writepointer += 4; //add SSCS_HEAP_MAGIC
 	free(checkvar);	
 	return retptr;
@@ -202,11 +194,9 @@ void sscs_cfree(void* ptr,const char* file,int line){
  */
 	size_t size = sscs_heap_object_size(ptr,file,line);
 	size += 40;
-	size_t alloc_len = size + PAGESIZE - (size % PAGESIZE) + PAGESIZE; //calculate original alloc_len
-/*
- * Change the permissions on the page back to Read + Write
- */
-	if(mprotect(orig+(alloc_len-PAGESIZE),PAGESIZE,PROT_READ | PROT_WRITE) != 0){ 
+	size_t alloc_len = size + PAGESIZE - (size % PAGESIZE) + PAGESIZE; /* calculate buffersize */
+
+	if(mprotect(orig+(alloc_len-PAGESIZE),PAGESIZE,PROT_READ | PROT_WRITE) != 0){ /* change the page back to R+W */
 		fprintf(stderr,"[ERROR] Could not undo guardpage (called from %s line %d): ",file,line);
 		switch(errno){
 			case EACCES:
@@ -231,6 +221,6 @@ void sscs_cfree(void* ptr,const char* file,int line){
 				break;
 		}
 	}
-	free(orig); //free buffer 
+	free(orig); /* free buffer */
 	return;	
 }

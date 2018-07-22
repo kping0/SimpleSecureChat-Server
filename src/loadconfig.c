@@ -39,17 +39,23 @@ static void getfromstdin(char* buffer,int buffer_l){
 }
 SCONFIG* loadconfig(void){
 	debuginfo();
+#ifndef SSCS_CONFIG_SET_ABSOLUTE_PATH
 	char* home_dir = secure_getenv("HOME");
 	size_t home_dir_l = strlen(home_dir);
-	size_t data_dir_l = home_dir_l + 17;
+	size_t data_dir_l = home_dir_l + 2 + strlen(SSCS_CONFIG_FOLDER_NAME);
 	char data_dir[data_dir_l];
-	sprintf(data_dir,"%s/.sscs_conf/",home_dir);
+	sprintf(data_dir,"%s/%s",home_dir,SSCS_CONFIG_FOLDER_NAME);
+#else
+	char data_dir[] = SSCS_CONFIG_ABSOLUTE_PATH;	
+	size_t data_dir_l = strlen(data_dir);	
+#endif /* SSCS_CONFIG_SET_ABSOLUTE_PATH */	
+
 	char config_file[data_dir_l + 10];
 	sprintf(config_file,"%ssscs_config",data_dir);
-	
+
 	SCONFIG* config = NULL;	
 	if(sconfig_config_exists(config_file) == 0){
-		if(mkdir(data_dir, S_IRUSR | S_IWUSR | S_IXUSR) && errno != EEXIST)cexit("Could not create ~/.ssc_local/ (errno == %d)\n",errno);
+		if(mkdir(data_dir, S_IRUSR | S_IWUSR | S_IXUSR) && errno != EEXIST)cexit("Could not create the configfolder %s (errno == %d)\n",data_dir,errno);
 		config = sconfig_load(config_file);
 
 		/* log file config */

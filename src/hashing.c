@@ -19,7 +19,7 @@
 
 #include "hashing.h"
 
-byte* memncat(byte* first,size_t firstl,byte* second,size_t secondl){ //concatenates two blocks of memory 
+byte* memncat(byte* first,size_t firstl,byte* second,size_t secondl){ //concatenates two blocks of memory into a third & returns ptr 
 	debuginfo();
 	byte* finalbuffer = cmalloc(firstl+secondl);
 	byte* writepointer = finalbuffer;
@@ -85,5 +85,6 @@ void SSCS_freehash(SSCS_HASH** hash){
 	cfree(((*hash)->salt));
 	cfree((*hash));
 	*hash = NULL;
+	return;
 }
 

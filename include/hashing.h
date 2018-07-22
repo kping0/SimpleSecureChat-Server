@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <openssl/sha.h>
 #include <openssl/rand.h>
+#include "cstdinfo.h"
 #include "base64.h"
 #include "settings.h"
 

@@ -122,7 +122,8 @@ int SSCS_object_add_data(sscso* obj,byte* label,byte* data,size_t size){
 	size_t old_buf_size = obj->allocated;	
 	int label_len = (int)strlen((const char*)label);
 	int modlabel_len = label_len+2;
-	byte* modlabel = cmalloc(modlabel_len+1); //+1 for the NUL 
+//	byte* modlabel = cmalloc(modlabel_len+1); //+1 for the NUL 
+	byte modlabel[modlabel_len+1];
 	sprintf(modlabel,"%s:\"",label);
 	size_t encoded_size;
 	if(old_buf_ptr != NULL){
@@ -170,7 +171,7 @@ int SSCS_object_add_data(sscso* obj,byte* label,byte* data,size_t size){
 	obj->allocated = new_buf_size;
 	obj->buf_ptr = new_buf_ptr;
 	cfree(intermediatebuf);
-	cfree(modlabel);
+//	cfree(modlabel);
 	return 0;
 }
 int SSCS_object_remove_data(sscso* obj,byte* label){

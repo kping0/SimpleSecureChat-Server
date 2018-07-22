@@ -28,6 +28,7 @@
 
 #include "simpleconfig.h"
 #include "cstdinfo.h"
+#include "settings.h"
 
 void usage(char* argv[]){
 	fprintf(stdout,"USAGE:   %s [TYPE] [LABEL] [DATA]\n",argv[0]);
@@ -39,13 +40,20 @@ void usage(char* argv[]){
 }
 int main(int argc,char* argv[]){
 	if(argc <= 2)usage(argv);
+#ifndef SSCS_CONFIG_SET_ABSOLUTE_PATH
 	char* home_dir = secure_getenv("HOME");
 	size_t home_dir_l = strlen(home_dir);
-	char data_dir[home_dir_l + 17];
-	sprintf(data_dir,"%s/.sscs_conf/",home_dir);
-	char config_file[home_dir_l + 17 + 10];
+	char data_dir_l = home_dir_l + 2 + strlen(SSCS_CONFIG_FOLDER_NAME);
+	char data_dir[data_dir_l];
+	sprintf(data_dir,"%s/%s",home_dir,SSCS_CONFIG_FOLDER_NAME);
+#else
+	char data_dir[] = SSCS_CONFIG_ABSOLUTE_PATH;
+	size_t data_dir_l = strlen(data_dir);
+#endif
+	char config_file[data_dir_l + 12];
 	sprintf(config_file,"%ssscs_config",data_dir);
 	SCONFIG* config = NULL;	
+
 	if(sconfig_config_exists(config_file) == 0){
 		if(mkdir(data_dir, S_IRUSR | S_IWUSR | S_IXUSR) && errno != EEXIST){
 				cexit("Could not create ~/.ssc_local/ (errno == %d)\n",errno);

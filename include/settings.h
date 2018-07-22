@@ -28,42 +28,42 @@
  */
 
 
-
-
-
 /* ------ DO NOT EDIT ABOVE THIS LINE ------ */
 /* ------ DO NOT EDIT ABOVE THIS LINE ------ */
 /* ------ DO NOT EDIT ABOVE THIS LINE ------ */
-
 
 
 /* should only be defined in release ready code (&must be defined if compiling for a live enviroment) (cannot be defined with DEBUG) */
-// #define RELEASE_IMAGE 
+	// #define RELEASE_IMAGE 
 
 /* Print alot of debug information (cannot be defined on a release) */
-// #define DEBUG
+	 #define DEBUG
 
 /* Print every function call to STDOUT. Needs DEBUG. ***ALOT*** of output */
-// #define SSCS_FUNCTION_LOG
+	// #define SSCS_FUNCTION_LOG
 
-/* Print live information (messages, salts, &etc) Needs DEBUG. ***ALOT of output */
-// #define SSCS_OUTPUT_LIVE
+/* Print live information (encrypted message b64, salts, &etc) Needs DEBUG. ***ALOT of output */
+	// #define SSCS_OUTPUT_LIVE
 
-/* fork for every client (default is spawn a thread) */
- #define SSCS_CLIENT_FORK
+/* fork for every client (comment out to use threads) */
+	 #define SSCS_CLIENT_FORK
 
 /* use protected heap allocation functions */
-#define SSCS_CUSTOM_MALLOC
+	 #define SSCS_CUSTOM_MALLOC
 
+/* name of config folder in $HOME */
+	#define SSCS_CONFIG_FOLDER_NAME ".sscs_conf/"
 
+/* set if you want to define an absolute path other than the default in $HOME */
+	//#define SSCS_CONFIG_SET_ABSOLUTE_PATH
+
+/* absolute path to config folder (only if using SSCS_CONFIG_ABSOLUTE_CUSTOM_PATH) */
+	// #define SSCS_CONFIG_ABSOLUTE_PATH "/full/path/to/configdir/"
 
 
 /* ------ DO NOT EDIT BEYOND THIS LINE ------ */
 /* ------ DO NOT EDIT BEYOND THIS LINE ------ */
 /* ------ DO NOT EDIT BEYOND THIS LINE ------ */
-
-
-
 
 
 #ifdef SSCS_CUSTOM_MALLOC
@@ -71,7 +71,7 @@
 #else
 	#define cmalloc(size) calloc(1,size) 
 	#define cfree(ptr) free(ptr) 
-	#define cmalloc_init() puts("") 
+	#define cmalloc_init() cempty_function()
 #endif
 
 #if defined(DEBUG) && defined(SSCS_FUNCTION_LOG)
