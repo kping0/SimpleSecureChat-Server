@@ -50,7 +50,7 @@
 // #define SSCS_OUTPUT_LIVE
 
 /* fork for every client (default is spawn a thread) */
-// #define SSCS_CLIENT_FORK
+ #define SSCS_CLIENT_FORK
 
 /* use protected heap allocation functions */
 #define SSCS_CUSTOM_MALLOC

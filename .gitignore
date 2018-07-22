@@ -2,6 +2,7 @@
 *.o
 *.Po
 *.log
+*.swp
 aclocal.m4
 config.h
 config.status
@@ -20,3 +21,4 @@ ssc_server
 ssc_server_config
 ssc_server_control
 autom4te.cache/
+TODO

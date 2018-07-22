@@ -20,8 +20,6 @@
 
 #include "loadconfig.h"
 
-/* #define RELEASE_IMAGE */
-
 /* loadconfig(): return a ptr to a sconfig object & if config is not found, create & populate with default settings */
 static void getfromstdin(char* buffer,int buffer_l){
 	debuginfo();

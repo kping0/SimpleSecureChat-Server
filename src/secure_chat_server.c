@@ -188,22 +188,33 @@ void* _ClientHandler(void* data){
 				if(checkforUser(rusername,db) == 1){
 					cdebug("Not adding user \"%s\"-> username already taken.\n",rusername);
 					SSL_write(ssl,"ERR",3);
+					cfree(rusername);
 				}
 				else{
 					cdebug(" User \"%s\" is trying to register",rusername);
 					char* b64rsa = (char*)SSCS_object_string(obj0,"b64rsa");
 					int rsalen = SSCS_object_int(obj0,"rsalen");
 					char* authkey = (char*)SSCS_object_string(obj0,"authkey");
-					if(strlen(authkey) < 256) goto end;
+					if(strlen(authkey) < 256){
+						cfree(rusername);
+						cfree(authkey);
+						cfree(b64rsa);
+						goto end;
+					}
 					if(addUser2DB(rusername,b64rsa,rsalen,authkey,db) != 1){
 						cerror(" inserting user %s\n",rusername);
 						SSL_write(ssl,"ERR",3);
+						cfree(rusername);
+						cfree(authkey);
+						cfree(b64rsa);
 						goto end;
 					}
 					else{
 						cdebug(" User \"%s\" registered\n",rusername);	
 						SSL_write(ssl,"OK",2);
 						cfree(rusername);
+						cfree(authkey);
+						cfree(b64rsa);
 					}
 				}
 			}
@@ -212,31 +223,46 @@ void* _ClientHandler(void* data){
 				char* userauthk = (char*)SSCS_object_string(obj0,"authkey");
 				if(strlen(userauthk) < 256){
 					cerror(" Authkey supplied <256 (%i)\n",(int)strlen(userauthk));
+					cfree(userauthk);
 					goto end;
 				}
 				char* authusername = (char*)SSCS_object_string(obj0,"username");
+				if(!authusername){
+					cfree(userauthk);
+					cerror("User did not supply a username to auth with.");
+					goto end;
+				}
 				SSCS_HASH* hash = getUserAuthKeyHash(authusername,db);
 				if(!hash){
 					cerror(" Authkey returned by getUserAuthKey is NULL, exiting\n");
+					cfree(userauthk);
+					cfree(authusername);
 					goto end;
 				}
 				if(SSCS_comparehash((byte*)userauthk,strlen(userauthk),hash) == SSCS_HASH_VALID){
 					cdebug(" User \"%s\" authenticated.\n",authusername);
 					SSCS_release(&obj0);
 					SSCS_freehash(&hash);
+					cfree(userauthk);
+					/* move authusername to stack */
+					int authusername_len = strlen(authusername);
+					char authusername_stack[authusername_len+1];
+					memcpy(authusername_stack,authusername,authusername_len);
+					authusername_stack[authusername_len] = '\0';
+					cfree(authusername);	
+						
 	/*
 	 * Enter Second loop after authentication
 	 */
 					while(1){
 						int r = SSL_read(ssl,buf, 4096); 
-					    	switch (SSL_get_error(ssl, r))
-					    	{ 
-					    	case SSL_ERROR_NONE: 
-					       		 break;
-					    	case SSL_ERROR_ZERO_RETURN: 
-							goto end; 
-					    	default: 
-							goto end;
+					    	switch (SSL_get_error(ssl, r)){ 
+						    	case SSL_ERROR_NONE: 
+						       		 break;
+						    	case SSL_ERROR_ZERO_RETURN: 
+								goto end; 
+						    	default: 
+								goto end;
 					    	}
 						buf[4095] = '\0';
 						sscso* obj = SSCS_open((byte*)buf);
@@ -247,21 +273,34 @@ void* _ClientHandler(void* data){
 						if(msgp == GETRSA){ //Client is requesting a User Public Key
 							cdebug("Client Requested Public Key,handling...\n");
 							char* rsausername = (char*)SSCS_object_string(obj,"username");
+							if(!rsausername){
+								cerror("no supplied username for GETRSA");
+								goto end;
+							}
 							const char* uRSAenc = GetEncodedRSA(rsausername,db);
-							cdebug("Sending buffer \"%s\"\n",uRSAenc);
 							if(uRSAenc){
+								cdebug("Sending buffer \"%s\"\n",uRSAenc);
 								SSL_write(ssl,uRSAenc,strlen(uRSAenc));	
 								cfree((void*)uRSAenc);
+							}
+							else{
+								SSL_write(ssl,"ERR",3);
 							}
 							cfree(rsausername);
 						}
 						else if(msgp == MSGREC){ //Client is requesting stored messages
-							char* retmsg = GetUserMessagesSRV(authusername,db);
-							if(strlen(retmsg) != 0){ 
-							#ifdef SSCS_OUTPUT_LIVE
-								cdebug("User(%s) wants new messages, Sending Message with len %d -- %s",authusername,strlen(retmsg),retmsg);
-							#endif
-								SSL_write(ssl,retmsg,strlen(retmsg));
+							char* retmsg = GetUserMessagesSRV(authusername_stack,db);
+							if(retmsg){
+								if(strlen(retmsg) != 0){ 
+								#ifdef SSCS_OUTPUT_LIVE
+									cdebug("User(%s) wants new messages, Sending Message with len %d -- %s",authusername_stack,strlen(retmsg),retmsg);
+								#endif
+									SSL_write(ssl,retmsg,strlen(retmsg));
+								}
+								else{
+									SSL_write(ssl,"ERROR",5);
+								}
+								cfree(retmsg);
 							}
 							else{
 								SSL_write(ssl,"ERROR",5);
@@ -272,25 +311,30 @@ void* _ClientHandler(void* data){
 							char* recipient = NULL;
 							recipient = (char*)SSCS_object_string(obj,"recipient");
 							if(!recipient){
-								cerror(" Recipient for message not specified,exiting\n");
+								cerror("Recipient for message not specified,exiting\n");
 								goto end;
 							}
 							char* newline = strchr(recipient,'\n');
 							if( newline ) *newline = 0;
-							if(SSCS_object_string(obj,"sender") != NULL)goto end;
-							SSCS_object_add_data(obj,"sender",(byte*)authusername,strlen(authusername));
-							char* b64modbuf = obj->buf_ptr;
-							cdebug("Buffering message from %s to %s\n",authusername,recipient);
+							char* sender_test_str = SSCS_object_string(obj,"sender");
+							if(sender_test_str){
+								cfree(sender_test_str);
+								cfree(recipient);
+								goto end;
+							}
+							SSCS_object_add_data(obj,"sender",(byte*)authusername_stack,strlen(authusername_stack));
+							cdebug("Buffering message from %s to %s\n",authusername_stack,recipient);
 							#ifdef SSCS_OUTPUT_LIVE
 							cdebug("Message length %d -- content -- %s",strlen(obj->buf_ptr),obj->buf_ptr);
 							#endif
-							if(AddMSG2DB(db,recipient,(unsigned char*)b64modbuf) == -1){
+							if(AddMSG2DB(db,recipient,obj->buf_ptr) == -1){
 								cerror(" Error occurred adding MSG to Database\n");
 								SSL_write(ssl,"ERR",3);	
 							}				
 							else{
 								SSL_write(ssl,"ACK",3);
 							}
+							cfree(recipient);
 						}
 						SSCS_release(&obj);
 						fflush(stdout);
@@ -298,8 +342,12 @@ void* _ClientHandler(void* data){
 					}
 				}
 				else{
-					cerror(" User %s failed to authenticate.\n",authusername);
+					cerror("User %s failed to authenticate.\n",authusername);
 					SSCS_freehash(&hash);
+					SSCS_release(&obj0);
+					SSCS_freehash(&hash);
+					cfree(userauthk);
+					cfree(authusername);
 				}	
 			}
 			else{
@@ -313,6 +361,7 @@ void* _ClientHandler(void* data){
 		}
 	end: //cleanup & exit
 		cdebug(" Ending Client Session\n");
+		if(config)sconfig_close(config);
 		BIO_free(bio);
 		SSL_free(ssl);
 		close(client); 

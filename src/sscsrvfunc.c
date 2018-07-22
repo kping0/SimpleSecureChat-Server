@@ -871,7 +871,9 @@ SSCS_HASH* getUserAuthKeyHash(char* username, MYSQL* db){
 	retstruct->hashl=authkey_len;
 	retstruct->salt=(byte*)salt;
 	retstruct->saltl=salt_len;
+#ifdef SSCS_OUTPUT_LIVE
 	cdebug("Salt is %s\n",salt);
+#endif
 
 	return retstruct;
 } /* getUserAuthKeyHash */
