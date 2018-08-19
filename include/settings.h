@@ -37,7 +37,7 @@
 	// #define RELEASE_IMAGE 
 
 /* Print alot of debug information (cannot be defined on a release) */
-	 #define DEBUG
+	// #define DEBUG
 
 /* Print every function call to STDOUT. Needs DEBUG. ***ALOT*** of output */
 	// #define SSCS_FUNCTION_LOG
@@ -59,6 +59,8 @@
 
 /* absolute path to config folder (only if using SSCS_CONFIG_ABSOLUTE_CUSTOM_PATH) */
 	// #define SSCS_CONFIG_ABSOLUTE_PATH "/full/path/to/configdir/"
+/* log ip addresses (toggle) */
+	  #define SSCS_LOG_IP_ADDRESSES
 
 
 /* ------ DO NOT EDIT BEYOND THIS LINE ------ */

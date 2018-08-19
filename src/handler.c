@@ -19,7 +19,7 @@
 
 #include "handler.h"
 
-void* _ClientHandler(void* data){ 
+void* ClientHandler(void* data){ 
 		debuginfo(); 
 		struct sscs_handler_data* client_info = data; 
 		int client = client_info->client_socket; 

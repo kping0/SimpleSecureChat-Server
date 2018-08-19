@@ -87,33 +87,37 @@ if(sconfig_get_int(config,"SSCS_LOGTOFILE") == 1){
         uint len = sizeof(addr);
 	
         int client = accept(sock, (struct sockaddr*)&addr, &len); //Accept Client Connections.
-	cinfo("Connection from: %s:%i",inet_ntoa(addr.sin_addr),(int)ntohs(addr.sin_port));
+#ifdef SSCS_LOG_IP_ADDRESSES
+	cinfo("Inbound Connection from %s:%i",inet_ntoa(addr.sin_addr),ntohs(addr.sin_port));
+#endif /* SSCS_LOG_IP_ADDRESSES */
 
-		struct sscs_handler_data* _hdl_data = cmalloc(sizeof(struct sscs_handler_data));
-		if(!_hdl_data){
-			cerror(" Failed to allocate memory for thread_data\n");
-			exit(0);
-		}
-
-		_hdl_data->client_socket = client;
-		_hdl_data->ctx = ctx;
+		struct sscs_handler_data* hdl_data = cmalloc(sizeof(struct sscs_handler_data));
+		/* check removed (cmalloc checks itself) */
+		hdl_data->client_socket = client;
+		hdl_data->ctx = ctx;
 		
 	#ifdef SSCS_CLIENT_FORK
 
 	/*
-	* We fork(clone the process) to handle each client. On exit these zombies are handled
-	* by childexit_handler
-	*/
+	 * We fork(clone the process) to handle each client.
+	 */
+
 		pid_t pid = fork();
 		if(pid == 0){ //If the pid is 0 we are running in the child process(our designated handler) 		
-			_ClientHandler(_hdl_data);
+			ClientHandler(hdl_data);
 		}
-		cfree(_hdl_data);
+		cfree(hdl_data);
+
 	#else
-		pthread_t _thr_id;
-		if(pthread_create(&_thr_id,NULL,_ClientHandler,_hdl_data)){
+	
+	/*
+	 * We spawn a thread that calls the ClientHandler to handle each client.
+	 */
+
+		pthread_t thr_id;
+		if(pthread_create(&thr_id,NULL,ClientHandler,hdl_data)){
 			cerror(" failed to create thread  %s\n",strerror(errno));
-			cfree(_hdl_data);
+			cfree(hdl_data);
 			exit(0);
 		}
 

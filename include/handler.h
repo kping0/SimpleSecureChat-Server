@@ -58,6 +58,6 @@ struct sscs_handler_data{
 	pthread_t* thread_info;	
 };
 
-void* _ClientHandler(void* data);
+void* ClientHandler(void* data);
 
 #endif /* _HANDLER_H */

@@ -182,7 +182,7 @@ void* sscs_cmalloc(size_t size,const char* file, int line){
 void sscs_cfree(void* ptr,const char* file,int line){
 	debuginfo();
 	if(ptr == NULL){
-		cdebug(" ptr passed is NULL(%s - %d)\n",file,line);
+		cdebug(" ptr passed is NULL\n");
 		return;
 	}
 	void* orig = ptr-21; //go back to original metasize buffer

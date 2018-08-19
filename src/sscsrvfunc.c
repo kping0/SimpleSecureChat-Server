@@ -49,30 +49,38 @@ int my_mysql_query(MYSQL* con,char* query){ //mysql_query() with error checking
 
 void init_DB(void){ //prepare database
 	debuginfo();
-	cinfo("MySQL client version-> %s",mysql_get_client_info());
-	char* srvhost = sconfig_get_str(config,"SSCDB_SRV");	
-	char* srvuser = sconfig_get_str(config,"SSCDB_USR");
-	char* srvpass = sconfig_get_str(config,"SSCDB_PASS");
-	cinfo("Trying to get a session started with the MySQL server -- %s::%s",srvhost,srvuser);
+	cdebug("MySQL client version-> %s",mysql_get_client_info());
 	MYSQL* con = mysql_init(NULL);
 	if(!con){
 		cerror(" %s\n",mysql_error(con));
+	#ifdef SSCS_CLIENT_FORK
 		exit(1);
+	#else
+		pthread_exit(NULL);
+	#endif
 	}
+	char* srvhost = sconfig_get_str(config,"SSCDB_SRV");	
+	char* srvuser = sconfig_get_str(config,"SSCDB_USR");
+	char* srvpass = sconfig_get_str(config,"SSCDB_PASS");
+
 	if(!mysql_real_connect(con,srvhost,srvuser,srvpass,NULL,0,NULL,0))exit_mysql_err(con);
+
 	if(mysql_query(con,"use SSCServerDB")){
 		cinfo(" ? Server DB not found, First Time Run? -> Trying to Create Database\n");
 		if(mysql_query(con,"CREATE DATABASE SSCServerDB"))exit_mysql_err(con);
 		if(mysql_query(con,"use SSCServerDB"))exit_mysql_err(con);
 		
 	}
+	cinfo("Started Session with DB(%s)-%s",mysql_get_client_info(),srvhost);
 //Create Messages Database & KnownUsers Database
 	my_mysql_query(con,"CREATE TABLE IF NOT EXISTS MESSAGES(MSGID INT AUTO_INCREMENT PRIMARY KEY,RECVUID INTEGER NOT NULL,MESSAGE TEXT NOT NULL)");
 	my_mysql_query(con,"CREATE TABLE IF NOT EXISTS KNOWNUSERS(UID INT AUTO_INCREMENT PRIMARY KEY,USERNAME TEXT NOT NULL,RSAPUB64 TEXT NOT NULL,RSALEN INT NOT NULL,SHA256 TEXT NOT NULL,SALT TEXT NOT NULL)");
-	mysql_close(con); 
+	my_mysql_query(con,"CREATE TABLE IF NOT EXISTS SERVER_ASSOC(SRVID INT AUTO_INCREMENT PRIMARY KEY,SRVNAME TEXT NOT NULL,IP TEXT NOT NULL, B64CERT TEXT NOT NULL)");		
+
 	cfree(srvhost);
 	cfree(srvuser);
 	cfree(srvpass);
+	mysql_close(con); 
 	return;
 } /* init_DB */
 
