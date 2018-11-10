@@ -111,6 +111,5 @@ SCONFIG* loadconfig(void){
 	else{
 		config = sconfig_load(config_file);
 	}
-	if(!config)return NULL;
 	return config;
 }
