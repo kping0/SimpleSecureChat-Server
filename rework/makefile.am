@@ -1,0 +1,23 @@
+bin_PROGRAMS = ssc_server ssc_server_config ssc_server_control
+
+_security_flags = -std=gnu99 -D_GNU_SOURCE -D_FORTIFY_SOURCE=2 -g -O2 -pipe -fexceptions -fstack-protector-all -fstack-check -Wall -Wextra -Wformat -Wformat-security -Wno-unused-function -Wno-pointer-sign -Wno-unused-result -Wno-unused-variable
+
+_security_linker = -pie -fPIE -Wl,-z,relro,-z,now,-z,defs 
+
+#server
+ssc_server_SOURCES = src/base64.c include/base64.h src/log.c include/log.h src/sha256_hash.c include/sha256_hash.h src/read_config.c include/read_config.h src/heap.c include/heap.h src/serial.c include/serial.h include/settings.h include/sconfig.h src/sconfig.c src/db.c include/db.h src/entry.c src/session.c include/session.h include/entry.h src/misc.c include/misc.h src/sock.c include/sock.h src/tls.c include/tls.h
+
+ssc_server_CFLAGS = $(_security_flags) `mysql_config --cflags` -Iinclude
+
+ssc_server_LDFLAGS = $(_security_linker) -lpthread -lcrypto -lssl `mysql_config --libs` 
+
+#server config
+ssc_server_config_SOURCES = src/modconf.c src/base64.c include/base64.h src/log.c include/log.h src/heap.c include/heap.h src/sconfig.c include/sconfig.h src/serial.c include/serial.h src/misc.c include/misc.h src/sock.c include/sock.h src/tls.c include/tls.h
+
+ssc_server_config_CFLAGS = $(_security_flags)  `mysql_config --cflags` -Iinclude
+
+ssc_server_config_LDFLAGS = $(_security_linker) `mysql_config --libs`
+
+# server_ctl
+ssc_server_control_SOURCES = src/server_ctl.c
+
