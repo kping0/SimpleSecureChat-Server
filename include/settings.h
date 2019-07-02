@@ -34,7 +34,7 @@
 
 
 /* should only be defined in release ready code (&must be defined if compiling for a live enviroment) (cannot be defined with DEBUG) */
-	// #define RELEASE_IMAGE 
+	 #define RELEASE_IMAGE 
 
 /* Print alot of debug information (cannot be defined on a release) */
 	// #define DEBUG

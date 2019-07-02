@@ -42,7 +42,6 @@ SCONFIG* sconfig_new_internal(const char* file,int line){
 	}
 	new_config->configpath = NULL;
 	new_config->configtemp = NULL;
-	new_config->configchanged = 0;
 	new_config->lock = 0;
 	return new_config;
 }
