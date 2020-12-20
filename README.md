@@ -5,7 +5,7 @@
 <h2>Building and Configuration of Server</h2>
   Go to our Wiki page https://github.com/kping0/SimpleSecureChat-Server/wiki
 <h2> Bug reports </h2>
-  Please report any security critical bugs to 'kping0@protonmail.com'
+  Please report any security critical bugs to 'afa02@pm.me'
 <h2> Credits </h2>
   Logo by dee-y - https://github.com/dee-y 
 <h2>License Header</h2>
